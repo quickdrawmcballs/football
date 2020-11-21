@@ -1,0 +1,174 @@
+{
+  "sportRadar": {
+    "format": "json",
+    "nfl_api": "vx6m3fvnsdmwa87fmuu6aqgt"
+  },
+  "theOddsApi":{
+    "api_key":"e0d683c85101317f19092fa48f290ec9",
+    "region":"us",
+    "dateFormat":"iso",
+    "oddsFormat":"american"
+  },
+  "teams": {
+    "Arizona Cardinals": {
+      "city": "Arizona",
+      "team": "Cardinals",
+      "full": "Arizona Cardinals"
+    },
+    "Atlanta Falcons": {
+      "city": "Atlanta",
+      "team": "Falcons",
+      "full": "Atlanta Falcons"
+    },
+    "Baltimore Ravens": {
+      "city": "Baltimore",
+      "team": "Ravens",
+      "full": "Baltimore Ravens"
+    },
+    "Buffalo Bills": {
+      "city": "Buffalo",
+      "team": "Bills",
+      "full": "Buffalo Bills"
+    },
+    "Carolina Panthers": {
+      "city": "Carolina",
+      "team": "Panthers",
+      "full": "Carolina Panthers"
+    },
+    "Chicago Bears": {
+      "city": "Chicago",
+      "team": "Bears",
+      "full": "Chicago Bears"
+    },
+    "Cincinnati Bengals": {
+      "city": "Cincinnati",
+      "team": "Bengals",
+      "full": "Cincinnati Bengals"
+    },
+    "Cleveland Browns": {
+      "city": "Cleveland",
+      "team": "Browns",
+      "full": "Cleveland Browns"
+    },
+    "Dallas Cowboys": {
+      "city": "Dallas",
+      "team": "Cowboys",
+      "full": "Dallas Cowboys"
+    },
+    "Denver Broncos": {
+      "city": "Denver",
+      "team": "Broncos",
+      "full": "Denver Broncos"
+    },
+    "Detroit Lions": {
+      "city": "Detroit",
+      "team": "Lions",
+      "full": "Detroit Lions"
+    },
+    "Green Bay Packers": {
+      "city": "Green Bay",
+      "team": "Packers",
+      "full": "Green Bay Packers"
+    },
+    "Houston Texans": {
+      "city": "Houston",
+      "team": "Texans",
+      "full": "Houston Texans"
+    },
+    "Indianapolis Colts": {
+      "city": "Indianapolis",
+      "team": "Colts",
+      "full": "Indianapolis Colts"
+    },
+    "Jacksonville Jaguars": {
+      "city": "Jacksonville",
+      "team": "Jaguars",
+      "full": "Jacksonville Jaguars"
+    },
+    "Kansas City Chiefs": {
+      "city": "Kansas City",
+      "team": "Chiefs",
+      "full": "Kansas City Chiefs"
+    },
+    "Las Vegas Raiders": {
+      "city": "Las Vegas",
+      "team": "Raiders",
+      "full": "Las Vegas Raiders"
+    },
+    "Los Angeles Chargers": {
+      "city": "Los Angeles",
+      "team": "Chargers",
+      "full": "Los Angeles Chargers"
+    },
+    "Los Angeles Rams": {
+      "city": "Los Angeles",
+      "team": "Rams",
+      "full": "Los Angeles Rams"
+    },
+    "Miami Dolphins": {
+      "city": "Miami",
+      "team": "Dolphins",
+      "full": "Miami Dolphins"
+    },
+    "Minnesota Vikings": {
+      "city": "Minnesota",
+      "team": "Vikings",
+      "full": "Minnesota Vikings"
+    },
+    "New England Patriots": {
+      "city": "New England",
+      "team": "Patriots",
+      "full": "New England Patriots"
+    },
+    "New Orleans Saints": {
+      "city": "New Orleans",
+      "team": "Saints",
+      "full": "New Orleans Saints"
+    },
+    "New York Giants": {
+      "city": "New York",
+      "team": "Giants",
+      "full": "New York Giants"
+    },
+    "New York Jets": {
+      "city": "New York",
+      "team": "Jets",
+      "full": "New York Jets"
+    },
+    "Philadelphia Eagles": {
+      "city": "Philadelphia",
+      "team": "Eagles",
+      "full": "Philadelphia Eagles"
+    },
+    "Pittsburgh Steelers": {
+      "city": "Pittsburgh",
+      "team": "Steelers",
+      "full": "Pittsburgh Steelers"
+    },
+    "San Francisco 49ers": {
+      "city": "San Francisco",
+      "team": "49ers",
+      "full": "San Francisco 49ers"
+    },
+    "Seattle Seahawks": {
+      "city": "Seattle",
+      "team": "Seahawks",
+      "full": "Seattle Seahawks"
+    },
+    "Tennessee Titans": {
+      "city": "Tennessee",
+      "team": "Titans",
+      "full": "Tennessee Titans"
+    },
+    "Tampa Bay Buccaneers": {
+      "city": "Tampa Bay",
+      "team": "Buccaneers",
+      "full": "Tampa Bay Buccaneers"
+    },
+    "Washington Football Team": {
+      "city": "Washington",
+      "team": "Football Team",
+      "full": "Washington Football Team"
+    }
+  } 
+}
