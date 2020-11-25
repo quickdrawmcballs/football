@@ -1,10 +1,8 @@
 {
   "sportRadar": {
-    "format": "json",
-    "nfl_api": "vx6m3fvnsdmwa87fmuu6aqgt"
+    "format": "json"
   },
   "theOddsApi":{
-    "api_key":"e0d683c85101317f19092fa48f290ec9",
     "region":"us",
     "dateFormat":"iso",
     "oddsFormat":"american"
