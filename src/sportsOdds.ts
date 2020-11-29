@@ -36,8 +36,7 @@ async function request(url:string,params:any) : Promise<any> {
     Logger.info(`Attempting GET: ${url}`);
     let resp = await axios(requestConfig);
     // Check your usage
-    Logger.info(`Remaining requests ${resp.headers['x-requests-remaining']}`);
-    Logger.info(`Used requests ${resp.headers['x-requests-used']}`);
+    Logger.info(`Used requests ${resp.headers['x-requests-used']}. Remaining requests ${resp.headers['x-requests-remaining']}`);
 
     return resp;
   } catch (err) {
