@@ -89,8 +89,7 @@ async function request(url:string) : Promise<any> {
     let used = Number(resp.headers['x-plan-quota-current']||0);
 
     // Check your usage
-    Logger.info(`Remaining requests ${alloted - used}`);
-    Logger.info(`Used requests ${used}`);
+    Logger.info(`Used requests ${used}. Remaining requests ${alloted - used}`);
 
     return resp;
   } catch (err) {
