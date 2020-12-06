@@ -4,4 +4,4 @@ declare module "*.json" {
 }
 
 declare module 'danfojs-node';
-declare module '@tensorflow/tfjs-node';
+declare module 'yargs/helpers';

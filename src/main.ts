@@ -1,16 +1,17 @@
 import _ from 'lodash';
 import * as dfd from 'danfojs-node';
 import * as tf from '@tensorflow/tfjs-node';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
 import { Logger } from './logging';
-import { getSchedule, getWeeklySchedule } from './sportRadar';
-import { getOddsSpread } from './sportsOdds';
-import { createDatedFileName, outputToFile } from './utils/output';
 import { doOdds } from './oddsEngine';
 import { doSeason } from './statsEngine';
 import { formatFloat } from './utils/utils';
 import { teams } from './utils/teams';
+import { DefaultDeserializer } from 'v8';
 
+const argv = yargs(hideBin(process.argv)).argv;
 const dateFormat = 'MM/D h:mm A';
 
 interface Game {
@@ -24,18 +25,26 @@ interface Game {
 }
 
 async function run() {
-  // doOdds(true);
+  let mode = _.get(argv,['_','0']);
 
-  // getSchedule().then(resp=>{
-  //   let i = 1;
-  // });
-  // doSeason();
-
-// function outputToFile(filePath:string,data:any) {
-//   return new Promise((resolve,reject)=>writeFile(filePath,data,err=>{
-//     if (err) reject(err); else resolve(true);
-//   }));
-// };
+  if (_.isEqual(mode,'odds')) {
+    let refresh = (/true/i).test(String(_.get(argv,'refresh')));
+    Logger.info(`Running odds... Refresh:${refresh}`);
+    doOdds(refresh);
+  }
+  else if (_.isEqual(mode,'season')) {
+    let refresh = (/true/i).test(String(_.get(argv,'refresh')));
+    Logger.info(`Running season... Refresh:${refresh}`);
+    doSeason(refresh);
+  }
+  else if (_.isEqual(mode,'dfd')) {
+    Logger.info(`Tensor Flow...`);
+    dfdTest();
+    // train();
+  }
+  else {
+    Logger.warn(`No mode is set. Exiting`);
+  }
 
   // console.log('----------------- hello world --------------');
   // await get_model();
@@ -75,7 +84,7 @@ async function load_process_data() {
 
   // Xtrain.head().print();
 
-  return [Xtrain.tensor, ytrain.tensor] //return the data as tensors
+  return [Xtrain.tensor, ytrain.tensor, Xtrain] //return the data as tensors
 }
 
 async function get_model() {
@@ -89,10 +98,13 @@ async function get_model() {
 }
 
 async function train() {
-  const model = await get_model()
-  const data = await load_process_data()
-  const Xtrain = data[0]
-  const ytrain = data[1]
+  const model = await get_model();
+  const data = await load_process_data();
+  const Xtrain = data[0];
+  const ytrain = data[1];
+  const origX = data[2];
+
+  origX.head().print();
 
   model.compile({
       optimizer: "rmsprop",
@@ -118,10 +130,9 @@ async function train() {
   }
 }
 
-
 async function dfdTest() {
   // let df = await dfd.read_csv('https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuff/titanic.csv');
-  let df = await dfd.read_csv('./output/20201110-174927_season.csv');
+  let df = await dfd.read_csv('./output/20201204-085904_season.csv');
   
   // add total_points column
   df.addColumn({column:'total_points',value:df.home_points.add(df.away_points)});
@@ -187,9 +198,9 @@ async function dfdTest() {
   // Standardize the data with MinMaxScaler
   let scaler = new dfd.MinMaxScaler();
   scaler.fit(X_all); //   // df.iloc({ columns: [`1:`] })
-  X_all = scaler.transform(X_all);
+  let X_all_scale = scaler.transform(X_all);
 
-  X_all.head().print();
+  X_all_scale.head().print();
 
   // #Center to the mean and component wise scale to unit variance.
   //  cols = [['HTGD','ATGD','HTP','ATP','DiffLP']]
@@ -199,7 +210,78 @@ async function dfdTest() {
   // df.loc({rows:[df.home_points.argmax()],columns:['home_team','away_team','home_points','away_points','total_points','home_diff','ftr']}).print();
   // df.loc({rows:[df.home_points.argmin()],columns:['home_team','away_team','home_points','away_points','total_points','home_diff','ftr']}).print();
 
+  let model = await dfdTrain(X_all_scale.tensor,y_all.tensor);
+
+  let data = {"home_team":['Bears'],"away_team":['Lions']};
+  let dt_test = new dfd.DataFrame(data);
+  encoder.fit(_.map(teams,'team'));
+  _.keys(data).forEach(col=>dt_test.addColumn({ column: col+'_norm', value: encoder.transform(dt_test[col])}));
+  dt_test.head().print();
+  let X_predict = dt_test.loc({columns:['home_team_norm','away_team_norm']});
+  scaler.fit(X_predict);
+  X_predict = scaler.transform(X_predict);
+
+  X_predict.head().print();
+
   let i=1;
+}
+
+async function dfdTrain(X_all:any,y_all:any) : Promise<tf.Sequential> {
+  const model:tf.Sequential = tf.sequential();
+  model.add(tf.layers.dense({ inputShape: [X_all.shape[1]], units: 124, activation: 'relu', kernelInitializer: 'leCunNormal' }));
+  model.add(tf.layers.dense({ units: 64, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 32, activation: 'relu' }));
+  model.add(tf.layers.dense({ units: 1, activation: "sigmoid" }));
+  model.summary();
+
+  model.compile({
+    optimizer: "rmsprop",
+    loss: 'binaryCrossentropy',
+    metrics: ['accuracy'],
+  });
+
+  console.log("Training started....")
+  try {
+    await model.fit(X_all, y_all,{
+        batchSize: 32,
+        epochs: 15,
+        validationSplit: 0.2,
+        callbacks:{
+            onEpochEnd: async(epoch:any, logs:any)=>{
+              console.log(`EPOCH (${epoch + 1}): Train Accuracy: ${(logs.acc * 100).toFixed(2)},Val Accuracy:  ${(logs.val_acc * 100).toFixed(2)}\n`);
+            }
+        }
+    });
+  } 
+  catch (err) {
+    console.error(err);
+  }
+
+  return model;
+}
+
+async function dfdPredict(model:tf.Sequential,features:any) {
+  try {
+    let predict = model.predict(features);
+    let i = 1;
+  }
+  catch (err) {
+    console.log(err);
+  }
+
+  // f1, acc = predict_labels(clf, X_test, y_test)
+  // def predict_labels(clf, features, target):
+  //   ''' Makes predictions using a fit classifier based on F1 score. '''
+    
+  //   # Start the clock, make predictions, then stop the clock
+  //   start = time()
+  //   y_pred = clf.predict(features)
+    
+  //   end = time()
+  //   # Print and return results
+  //   print "Made predictions in {:.4f} seconds.".format(end - start)
+    
+  //   return f1_score(target, y_pred, pos_label='H'), sum(target == y_pred) / float(len(y_pred))
 }
 
 // function oldDfdTest() {
