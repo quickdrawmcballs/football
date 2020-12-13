@@ -140,7 +140,7 @@ const transform = (entry:any) => {
   return entry;
 };
 
-export async function doSeason(refresh?:boolean) {
+export async function doSeason(refresh?:boolean) : Promise<any> {
   try {
     let games:Game[] = await getSeasonGames(refresh);
 
@@ -167,6 +167,11 @@ export async function doSeason(refresh?:boolean) {
       // create the odds file
       await outputToFile(createDatedFileName('season.csv'),csv);
       Logger.info(`Created Season Results successful`);
+    }
+
+    return {
+      csv,
+      json: withStats
     }
   }
   catch(err) {

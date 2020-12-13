@@ -18,7 +18,6 @@ const Markets = _.keyBy(['spreads'],key=>key);
 export const getOddsSpread = () => request(preURL,buildOddsRequest(Markets.spreads));
 
 function buildOddsRequest(mkt:string=Markets.spreads): any {
-  let test = Config.theOddsApi;
   return _.merge({},Config.theOddsApi,{
     sport,
     mkt
