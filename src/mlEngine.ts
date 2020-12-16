@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import * as dfd from 'danfojs-node';
 import * as tf from '@tensorflow/tfjs-node';
-import { mean, stackOffsetSilhouette } from 'd3';
+import { mean } from 'd3';
 
 import { teams } from './utils/teams';
 import { formatFloat } from './utils/utils';
