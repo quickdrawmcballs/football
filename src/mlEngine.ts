@@ -266,7 +266,7 @@ function getTeamGames(dataframe:any,team:string) : any {
   };
 }
 
-function xAvgTransform(dataframe:any,xGames:number) : any{
+function xAvgTransform(dataframe:any,xGames:number) : any {
 
   const offset = Math.max(xGames-1,0);
 
@@ -276,6 +276,7 @@ function xAvgTransform(dataframe:any,xGames:number) : any{
     'home_total_passing_yards','away_total_passing_yards','home_diff','away_diff']});
 
   let teamsData = new Map();
+
   // get team calcs
   _.values(teams).forEach( (team:any) => {
     // create xAvg values
@@ -290,6 +291,8 @@ function xAvgTransform(dataframe:any,xGames:number) : any{
         return mean(combined.data.slice(start,i+1));
       });
       teamData.addColumn({column:`avg_x_off${col}`,value});
+      let total = _.map(combined.data,(val:any,i:number)=>mean(combined.data.slice(0,i+1)));
+      teamData.addColumn({column:`total_x_off${col}`,total})
 
       combined = teamData.loc({columns:['def'+col]});
       value = _.map(combined.data,(val:any,i:number)=>{
@@ -297,18 +300,10 @@ function xAvgTransform(dataframe:any,xGames:number) : any{
         return mean(combined.data.slice(start,i+1));
       });
       teamData.addColumn({column:`avg_x_def${col}`,value});
+      total = _.map(combined.data,(val:any,i:number)=>mean(combined.data.slice(0,i+1)));
+      teamData.addColumn({column:`total_x_def${col}`,total})
     });
 
-    // // loop thru the data and create a new transformed array
-    // let value = _.map(teamData.data,(val:any,i:number)=>{
-    //   let start:number = (i <= offset) ? 0 : (i-offset);
-    //   let avg = mean(colVals.slice(start,i));
-    //   return avg;
-    // });
-
-    // dataframe of team games  
-    // let teamGames = getTeamGames(dataframe,team.team);
-    // teamGames.teamData.iloc({columns:['4:0']});
     teamsData.set(team.team,teamData);
   });
 
@@ -344,7 +339,7 @@ function xAvgTransform(dataframe:any,xGames:number) : any{
   //   }
   // })});
 
-  return df;
+  return teamsData;
 }
 
 async function dfdTrain(X_all:any,y_all:any) : Promise<tf.Sequential> {
