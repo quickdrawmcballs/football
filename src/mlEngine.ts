@@ -8,6 +8,19 @@ import { formatFloat } from './utils/utils';
 import { doSeason } from './statsEngine';
 import { data } from '@tensorflow/tfjs-node';
 
+const transformCols = ['avg_x_off_points', 'total_x_off_points', 'avg_x_def_points', 'total_x_def_points', 
+  'avg_x_off_total_rushing_yards', 'total_x_off_total_rushing_yards', 'avg_x_def_total_rushing_yards', 'total_x_def_total_rushing_yards', 
+  'avg_x_off_total_passing_yards', 'total_x_off_total_passing_yards', 'avg_x_def_total_passing_yards', 'total_x_def_total_passing_yards', 
+  'avg_x_off_diff', 'total_x_off_diff', 'avg_x_def_diff', 'total_x_def_diff','wld'];
+const finalCols = ['home_team_norm','away_team_norm','home_avg_x_off_points', 'home_total_x_off_points', 'home_avg_x_def_points', 
+'home_total_x_def_points', 'home_avg_x_off_total_rushing_yards', 'home_total_x_off_total_rushing_yards', 'home_avg_x_def_total_rushing_yards', 
+'home_total_x_def_total_rushing_yards', 'home_avg_x_off_total_passing_yards', 'home_total_x_off_total_passing_yards', 'home_avg_x_def_total_passing_yards', 
+'home_total_x_def_total_passing_yards', 'home_avg_x_off_diff', 'home_total_x_off_diff', 'home_avg_x_def_diff', 'home_total_x_def_diff', //'home_wld_norm', 
+'away_avg_x_off_points', 'away_total_x_off_points', 'away_avg_x_def_points', 'away_total_x_def_points', 'away_avg_x_off_total_rushing_yards', 
+'away_total_x_off_total_rushing_yards', 'away_avg_x_def_total_rushing_yards', 'away_total_x_def_total_rushing_yards', 'away_avg_x_off_total_passing_yards', 
+'away_total_x_off_total_passing_yards', 'away_avg_x_def_total_passing_yards', 'away_total_x_def_total_passing_yards', 'away_avg_x_off_diff', 'away_total_x_off_diff', 
+'away_avg_x_def_diff', 'away_total_x_def_diff', 'ftr_norm']; // 'away_wld_norm',
+
 async function load_process_data() {
   let df = await dfd.read_csv("delete/titanic.csv")
 
@@ -86,7 +99,107 @@ export async function train() {
 
 export async function dfdTest() {
   // let df = await dfd.read_csv('https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuff/titanic.csv');
-  let df = await dfd.read_csv('./output/20201204-085904_season.csv');
+  let df = await dfd.read_csv('./output/20201215-190756_season.csv');
+  
+  // add total_points column
+  df.addColumn({column:'total_points',value:df.home_points.add(df.away_points)});
+  df.addColumn({column:'home_diff',value:df.home_points.sub(df.away_points)});
+  df.addColumn({column:'away_diff',value:df.away_points.sub(df.home_points)});
+  df.addColumn({column:'ftr',value:df.home_diff.map((val:number)=>{
+    if (val>0) {
+      return 'H';
+    }
+    else if (val<0) {
+      return 'A';
+    }
+    else {
+      return 'D';
+    }
+  })});
+
+  let x3weekAvgs = xAvgTransform(df,3);
+  let dfTransformed = getTransformDf(df,x3weekAvgs);
+
+  console.log('Encoding String Value Columns...');
+  // process all labeled columns
+  let encoder = new dfd.LabelEncoder();
+  let name_cols = ['home_team','away_team'];
+  encoder.fit(_.map(teams,'team'));
+  let encoded_names = encoder.label;
+  name_cols.forEach(col => dfTransformed.addColumn({ column: col+'_norm', value: encoder.transform(dfTransformed[col]) }));
+
+  // encoder.fit(dfTransformed.home_wld);
+  // let encoded_home_wld = encoder.label;
+  // dfTransformed.addColumn({ column: 'home_wld_norm', value: encoder.transform(dfTransformed.home_wld) });
+
+  // encoder.fit(dfTransformed.home_wld);
+  // let encoded_away_wld = encoder.label;
+  // dfTransformed.addColumn({ column: 'home_wld_norm', value: encoder.transform(dfTransformed.away_wld) });
+
+  encoder.fit(dfTransformed.ftr);
+  let encoded_ftr = encoder.label;
+  dfTransformed.addColumn({ column: 'ftr_norm', value: encoder.transform(dfTransformed.ftr) });
+
+  const toTest = 1;
+
+  // test with the last once
+  // let X_all = dfTransformed.loc({columns:finalCols});
+  let X_all = dfTransformed.loc({columns:finalCols,rows:[`0:${dfTransformed.shape[0]-toTest}`]});
+  let dt_test = dfTransformed.loc({columns:finalCols,rows:[`${dfTransformed.shape[0]-toTest}:${dfTransformed.shape[0]}`]});
+  // X_all = X_all.iloc({rows:[`0:${dfTransformed.shape[0]-1}`]});
+  // X_all.head().print();
+  
+  let y_all = dfTransformed.loc({columns:['ftr_norm'],rows:[`0:${dfTransformed.shape[0]-toTest}`]});
+
+  console.log('Scaling Min/Max...');
+  // Standardize the data with MinMaxScaler
+  let scaler = new dfd.MinMaxScaler();
+  scaler.fit(X_all); //   // df.iloc({ columns: [`1:`] })
+  let X_all_scale = scaler.transform(X_all);
+
+  // X_all_scale.head().print();
+
+  // let test = dfTransformed.loc({columns:['home_team','home_team_norm'],rows:[`0:${dfTransformed.shape[0]-1}`]});
+  // test.addColumn({column:'home_team_scale',value:X_all_scale[0]});
+  // let teamIndexes = createTeamIndex(test);
+
+  // #Center to the mean and component wise scale to unit variance.
+  //  cols = [['HTGD','ATGD','HTP','ATP','DiffLP']]
+  //  for col in cols:
+  //     X_all[col] = scale(X_all[col])
+
+  console.log('Model Training starting...');
+  let model = await dfdTrain(X_all_scale.tensor,y_all.tensor);
+
+  // let data = {"home_team":['Bears'],"away_team":['Lions']};
+  // let dt_test = new dfd.DataFrame(data);
+  // encoder.fit(_.map(teams,'team'));
+  // _.keys(data).forEach(col=>dt_test.addColumn({ column: col+'_norm', value: encoder.transform(dt_test[col])}));
+  // dt_test.head().print();
+  // let X_predict = dt_test.loc({columns:['home_team_norm','away_team_norm']});
+  // scaler.fit(X_predict);
+  // X_predict = scaler.transform(X_predict);
+
+  // X_predict.head().print();
+
+  // let i=1;
+
+  // let dt_test = dfTransformed.loc({columns:finalCols,rows:[`${dfTransformed.shape[0]}`]});
+
+  // let data = {"0":[_.find(teamIndexes,['home_team','Bears']).home_team_scale],"1":[_.find(teamIndexes,['home_team','Lions']).home_team_scale]};
+  // let dt_test = new dfd.DataFrame(data);
+  // dt_test.head().print();
+
+  console.log('Model Predict starting...');
+  let prediction = await dfdPredict(model,dt_test.tensor);
+  console.log('Prediction says...');
+  console.log(prediction.arraySync());
+  let i = 1;
+}
+
+export async function dfdTestBack() {
+  // let df = await dfd.read_csv('https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuff/titanic.csv');
+  let df = await dfd.read_csv('./output/20201215-190756_season.csv');
   
   // add total_points column
   df.addColumn({column:'total_points',value:df.home_points.add(df.away_points)});
@@ -105,6 +218,7 @@ export async function dfdTest() {
   })});
 
   let testIt = xAvgTransform(df,3);
+  let testIt2 = getTransformDf(df,testIt);
 
   // let ravensGames = getTeamGames(df,'Ravens');
   // let testIt = getXWeekAvgs(ravensGames,'Ravens',0,3);
@@ -203,16 +317,6 @@ export async function dfdTest() {
   // dfdPredict(model,dt_test.tensor);
 }
 
-interface iTeamGames {
-  all: any[],
-  homeGames: any[],
-  awayGames: any[]
-}
-
-function combineHomeAwayGames(homeGames:any[],awayGames:any[]) : any[] {
-  let all = _.concat([],homeGames,awayGames);
-  return _.sortBy(all, each=>each[0]);
-}
 
 function getTeamGames(dataframe:any,team:string) : any {
   let homeGames = dataframe.query({ 'column': 'home_team', 'is': '==', 'to': team });
@@ -246,14 +350,14 @@ function getTeamGames(dataframe:any,team:string) : any {
     teamData.addColumn({column:'off'+col,value:off});
     teamData.addColumn({column:'def'+col,value:def});
   });
+
   let combined = allGames.loc({columns:['home_team','away_team','ftr']});
-  let wld:string[]=[];
-  combined.data.forEach((reduced:any) => {
+  let wld = combined.data.map((reduced:any) => {
     if (reduced[0] === team) {
-      wld.push(reduced[2]==='H'?'W':reduced[4]==='D'?'D':'L');
+      return (reduced[2]==='H'?'W':(reduced[2]==='D')?'D':'L');
     }
     else {
-      wld.push(reduced[2]==='A'?'W':reduced[4]==='D'?'D':'L');
+      return (reduced[2]==='A'?'W':(reduced[2]==='D')?'D':'L');
     }
   });
   teamData.addColumn({column:'wld',value:wld});
@@ -268,12 +372,12 @@ function getTeamGames(dataframe:any,team:string) : any {
 
 function xAvgTransform(dataframe:any,xGames:number) : any {
 
-  const offset = Math.max(xGames-1,0);
+  const offset = Math.max(xGames,0);
 
   // let df = dataframe.loc({columns:['week','id','scheduled','home_team','away_team']});
-  let df = dataframe.iloc({columns:['0:4']});
-  let transform = dataframe.loc({columns:['home_points','away_points','home_total_rushing_yards','away_total_rushing_yards',
-    'home_total_passing_yards','away_total_passing_yards','home_diff','away_diff']});
+  // let df = dataframe.iloc({columns:['0:4']});
+  // let transform = dataframe.loc({columns:['home_points','away_points','home_total_rushing_yards','away_total_rushing_yards',
+  //   'home_total_passing_yards','away_total_passing_yards','home_diff','away_diff']});
 
   let teamsData = new Map();
 
@@ -287,21 +391,23 @@ function xAvgTransform(dataframe:any,xGames:number) : any {
     ['_points','_total_rushing_yards','_total_passing_yards','_diff'].forEach((col:string)=>{
       let combined = teamData.loc({columns:['off'+col]});
       let value = _.map(combined.data,(val:any,i:number)=>{
+        if (i===0) return 0;
         let start:number = (i <= offset) ? 0 : (i-offset);
-        return mean(combined.data.slice(start,i+1));
+        return mean(combined.data.slice(start,i));
       });
       teamData.addColumn({column:`avg_x_off${col}`,value});
-      let total = _.map(combined.data,(val:any,i:number)=>mean(combined.data.slice(0,i+1)));
-      teamData.addColumn({column:`total_x_off${col}`,total})
+      let total = _.map(combined.data,(val:any,i:number)=>mean(combined.data.slice(0,i))||0);
+      teamData.addColumn({column:`total_x_off${col}`,value:total})
 
       combined = teamData.loc({columns:['def'+col]});
       value = _.map(combined.data,(val:any,i:number)=>{
+        if (i===0) return 0;
         let start:number = (i <= offset) ? 0 : (i-offset);
-        return mean(combined.data.slice(start,i+1));
+        return mean(combined.data.slice(start,i));
       });
       teamData.addColumn({column:`avg_x_def${col}`,value});
-      total = _.map(combined.data,(val:any,i:number)=>mean(combined.data.slice(0,i+1)));
-      teamData.addColumn({column:`total_x_def${col}`,total})
+      total = _.map(combined.data,(val:any,i:number)=>mean(combined.data.slice(0,i))||0);
+      teamData.addColumn({column:`total_x_def${col}`,value:total})
     });
 
     teamsData.set(team.team,teamData);
@@ -342,6 +448,31 @@ function xAvgTransform(dataframe:any,xGames:number) : any {
   return teamsData;
 }
 
+function getTransformDf(dataframe:any, teamsData:any) : any {
+  console.log("Data Transformation starting...");
+
+  let df = dataframe.iloc({columns:['0:5']});
+  let data = dataframe.data.map((game:any)=>{
+    let week = game[0];
+    let homeTeam = game[3];
+    let awayTeam = game[4];
+
+    let homeGames = teamsData.get(homeTeam);
+    let awayGames = teamsData.get(awayTeam);
+    
+    let filteredHomeWeek = homeGames.query({ 'column': 'week', 'is': '==', 'to': week }).loc({columns:transformCols});
+    let filteredAwayWeek = awayGames.query({ 'column': 'week', 'is': '==', 'to': week }).loc({columns:transformCols});
+
+    return [].concat(...filteredHomeWeek.data,...filteredAwayWeek.data);
+  });
+
+  let transformedDf = new dfd.DataFrame(data, {columns:transformCols.map(col=>`home_${col}`).concat(transformCols.map(col=>`away_${col}`))});
+  let com_df = dfd.concat({ df_list: [df, transformedDf], axis: 1 })
+  com_df.addColumn({column:'ftr',value:dataframe.ftr});
+
+  return com_df;
+}
+
 async function dfdTrain(X_all:any,y_all:any) : Promise<tf.Sequential> {
   const model:tf.Sequential = tf.sequential();
   model.add(tf.layers.dense({ inputShape: [X_all.shape[1]], units: 124, activation: 'relu', kernelInitializer: 'leCunNormal' }));
@@ -356,7 +487,7 @@ async function dfdTrain(X_all:any,y_all:any) : Promise<tf.Sequential> {
     metrics: ['accuracy'],
   });
 
-  console.log("Training started....")
+  console.log("Training started....");
   try {
     await model.fit(X_all, y_all,{
         batchSize: 32,
@@ -376,10 +507,14 @@ async function dfdTrain(X_all:any,y_all:any) : Promise<tf.Sequential> {
   return model;
 }
 
-async function dfdPredict(model:tf.Sequential,features:any) {
+async function dfdPredict(model:tf.Sequential,features:any) : Promise<any> {
   try {
-    let predict = model.predict(features);
-    let i = 1;
+    return model.predict(features);
+
+    // let predict = await model.predict(features);
+    // console.log(result);
+
+    // return predict;
   }
   catch (err) {
     console.log(err);
