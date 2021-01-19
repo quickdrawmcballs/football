@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "main": "cross-env NODE_ENV=debug node lib/main.js"
+    "main": "cross-env NODE_ENV=debug node lib/main.js",
+    "prepare": "npm run build",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
