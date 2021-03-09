@@ -14,9 +14,6 @@ const statics = {
 
 const preURL = "http://api.sportradar.us/nfl/official/trial/v6/en/";
 
-const test = "http://api.sportradar.us/nfl/official/trial/v6/en/games/"+
-  "0e00303b-ee60-4cf4-ad68-48efbe53901d/boxscore.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt";
-
 
 /// Export Section
 export const getWeeklySchedule = (week:number | string) => request(buildWeeklySchedule(week));
@@ -31,7 +28,7 @@ function buildURL(endpoint:string,...opts:string[]): string {
 
 /**
  * buildWeeklySchedule - 
- * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/2020/REG/1/schedule.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt
+ * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/2020/REG/1/schedule.json?api_key=
  * @param week 
  * @returns string
  */
@@ -41,7 +38,7 @@ function buildWeeklySchedule(week:number | string) : string {
 
 /**
  * buildBoxScore - 
- * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/0e00303b-ee60-4cf4-ad68-48efbe53901d/boxscore.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt
+ * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/0e00303b-ee60-4cf4-ad68-48efbe53901d/boxscore.json?api_key=
  * @param game_id 
  * @returns string
  */
@@ -51,7 +48,7 @@ function buildBoxScore(game_id:string) : string {
 
 /**
  * buildSchedule
- * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/2020/REG/schedule.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt
+ * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/2020/REG/schedule.json?api_key=
  * 
  * @param year schedule year (defaults: 2020)
  * @param season season (PRE,REG,PST, defaults: REG)
@@ -63,7 +60,7 @@ function buildSchedule(year:string='2020',season:string='REG') : string {
 
 /**
  * buildGameStats
- * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/018556f9-1977-4a0b-8244-20cad15df9a4/statistics.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt
+ * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/018556f9-1977-4a0b-8244-20cad15df9a4/statistics.json?api_key=
  * 
  * @param game_id
  * @returns string

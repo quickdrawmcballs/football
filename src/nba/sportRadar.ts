@@ -19,7 +19,7 @@ function buildURL(endpoint:string,...opts:string[]): string {
 
 /**
  * buildBoxScore - 
- * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/0e00303b-ee60-4cf4-ad68-48efbe53901d/boxscore.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt
+ * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/0e00303b-ee60-4cf4-ad68-48efbe53901d/boxscore.json?api_key=
  * @param game_id 
  * @returns string
  */
@@ -41,7 +41,7 @@ function buildSchedule(year:string='2020',season:string='REG') : string {
 
 /**
  * buildGameBoxScore
- * ex: http://api.sportradar.us/nba/trial/v7/en/games/22ca891e-3589-40d1-b9ca-31196c83b883/boxscore.xml?api_key=uhjmv47p7vv628dgkr9vvphm
+ * ex: http://api.sportradar.us/nba/trial/v7/en/games/22ca891e-3589-40d1-b9ca-31196c83b883/boxscore.xml?api_key=
  * 
  * @param game_id
  * @returns string
