@@ -185,11 +185,11 @@ async function _getGameStats(gameId:string) : Promise<any> {
     gameData = undefined;
   }
   if (!gameData) {
-    let resp = await getGameStats(gameId);
+    let resp = await getGameBoxScore(gameId);
 
     gameData = _.get(resp,'data',{});
 
-    await outputToFile('./output/game_stats/' + gameId,JSON.stringify(gameData));
+    await outputToFile('./output/nba/game_stats/' + gameId,JSON.stringify(gameData));
   }
 
   return gameData;
