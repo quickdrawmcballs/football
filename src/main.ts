@@ -6,6 +6,9 @@ import { Logger } from './logging';
 import { doOdds } from './oddsEngine';
 import { doSeason } from './statsEngine';
 import { dfdTest, train } from './mlEngine';
+import { iSportType } from './utils/interfaces';
+
+import { doOdds as NBAOdds } from './nba/oddsEngine';
 
 const argv = yargs(hideBin(process.argv)).argv;
 const dateFormat = 'MM/D h:mm A';
@@ -23,12 +26,22 @@ interface Game {
 async function run() {
   let mode = _.get(argv,['_','0']);
 
-  if (_.isEqual(mode,'odds')) {
+  if (_.isEqual(mode,'nfl_odds')) {
     let refresh = (/true/i).test(String(_.get(argv,'refresh')));
-    Logger.info(`Running odds... Refresh:${refresh}`);
-    doOdds(refresh);
+    Logger.info(`Running NFL odds... Refresh:${refresh}`);
+    doOdds({sport:'americanfootball_nfl',display:'nfl'},refresh);
+  }
+  else if (_.isEqual(mode,'nba_odds')) {
+    let refresh = (/true/i).test(String(_.get(argv,'refresh')));
+    Logger.info(`Running NBA odds... Refresh:${refresh}`);
+    doOdds({sport:'basketball_nba',display:'nba'},refresh);
   }
   else if (_.isEqual(mode,'season')) {
+    let refresh = (/true/i).test(String(_.get(argv,'refresh')));
+    Logger.info(`Running season... Refresh:${refresh}`);
+    doSeason(refresh);
+  }
+  else if (_.isEqual(mode,'nba_season')) {
     let refresh = (/true/i).test(String(_.get(argv,'refresh')));
     Logger.info(`Running season... Refresh:${refresh}`);
     doSeason(refresh);

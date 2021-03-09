@@ -2,13 +2,12 @@ import _ from 'lodash';
 import moment from 'moment';
 import { parse } from 'json2csv';
 
-import { Logger } from './logging';
-import { getOddsSpread } from './sportsOdds';
-import { convertToCsv, createDatedFileName, outputToFile, readFromFile } from './utils/output';
-import { getTeam } from './utils/teams';
-import { iSportType } from './utils/interfaces';
+import { Logger } from '../logging';
+import { getOddsSpread } from '../sportsOdds';
+import { convertToCsv, createDatedFileName, outputToFile, readFromFile } from '../utils/output';
+import { getTeam } from '../utils/teams';
 
-const dateFormat = 'MM/D hh:mm A';
+const dateFormat = 'MM/D h:mm A';
 
 interface Game {
   date: string;
@@ -55,23 +54,23 @@ const fields = [
   }
 ]
 
-async function _getGameOdds(sport:iSportType,refresh:boolean=true) : Promise<any[]> {
-  let gameOdds:any[] = refresh ? undefined :JSON.parse( await readFromFile(`./${sport.display}_oddsData.json`));
+async function _getGameOdds(refresh:boolean=true) : Promise<any[]> {
+  let gameOdds:any[] = refresh ? undefined :JSON.parse( await readFromFile('./oddsData.json'));
   
   if (!gameOdds) {
-    let resp = await getOddsSpread(sport.sport);
+    let resp = await getOddsSpread();
 
     gameOdds = _.get(resp,'data.data',[]);
 
     // write the json to file
-    await outputToFile(`${sport.display}_oddsData.json`,JSON.stringify(gameOdds));
+    await outputToFile('oddsData.json',JSON.stringify(gameOdds));
   }
 
   return gameOdds;
 }
 
 function _parseGames(games:any[]) : Game[] {
-  let test2 =  _.sortBy(games.map(data=>{
+  return _.sortBy(games.map(data=>{
     let odds = _.find(data.sites,['site_key','bovada']);
     if (!odds) {odds = _.find(data.sites,['site_key','draftkings']);}
     if (!odds && data.sites.length>0) {
@@ -94,14 +93,12 @@ function _parseGames(games:any[]) : Game[] {
     }
 
     return game;
-  }),['date','home_team']);
-
-  return test2;
+  }),['date', 'home_team']);
 }
 
-export async function doOdds(sport:iSportType,refresh:boolean=true) {
+export async function doOdds(refresh:boolean=true) {
 
-  let gameOdds:any[] = await _getGameOdds(sport,refresh);
+  let gameOdds:any[] = await _getGameOdds(refresh);
 
   let games:Game[] = _parseGames(gameOdds);
 
@@ -111,7 +108,7 @@ export async function doOdds(sport:iSportType,refresh:boolean=true) {
   if (csv!=='') {
     Logger.debug(`Creating csv file from this week's odds`);
     // create the odds file
-    await outputToFile(createDatedFileName(`${sport.display}_odds.csv`),csv);
+    await outputToFile(createDatedFileName('odds.csv'),csv);
   }
 
   Logger.info(`Created Odds File successful`);

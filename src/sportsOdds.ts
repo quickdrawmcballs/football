@@ -5,19 +5,18 @@ import { Config } from './config';
 import { Logger } from './logging';
 
 const preURL = "https://api.the-odds-api.com/v3/odds/";
-const sport = "americanfootball_nfl";
 // const apiKey:string = Config.theOddsApi.apiKey;
 // const region = "us";
 // const mkt="spreads";
 
-const example = "GET /v3/odds/?sport={sport}&region={region}&mkt={mkt}&apiKey={apiKey}&dateFormat={iso}&oddsFormat={american}";
-const real_example = "GET /v3/odds/?apiKey={e0d683c85101317f19092fa48f290ec9}&sport={americanfootball_nfl}&region={us}&mkt={spreads}";
+// const example = "GET /v3/odds/?sport={sport}&region={region}&mkt={mkt}&apiKey={apiKey}&dateFormat={iso}&oddsFormat={american}";
+// const real_example = "GET /v3/odds/?apiKey={e0d683c85101317f19092fa48f290ec9}&sport={americanfootball_nfl}&region={us}&mkt={spreads}";
 
 const Markets = _.keyBy(['spreads'],key=>key);
 
-export const getOddsSpread = () => request(preURL,buildOddsRequest(Markets.spreads));
+export const getOddsSpread = (sport?:string) => request(preURL,buildOddsRequest(sport,Markets.spreads));
 
-function buildOddsRequest(mkt:string=Markets.spreads): any {
+function buildOddsRequest(sport:string='americanfootball_nfl',mkt:string=Markets.spreads): any {
   return _.merge({},Config.theOddsApi,{
     sport,
     mkt

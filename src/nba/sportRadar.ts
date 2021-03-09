@@ -1,42 +1,20 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
-import { Config } from './config';
-import { Logger } from './logging';
+import { Config } from '../config';
+import { Logger } from '../logging';
 
-const api_key:string = Config.sportRadar.nfl_api;
-const ret_format:string = Config.sportRadar.format; //'.json';
+const api_key:string = Config.sportRadar.nba_api;
+const ret_format:string = Config.sportRadar.format;
 
-const statics = {
-  year: '2020',
-  nfl_season: 'reg',
-  nfl_season_week: '7'
-}
-
-const preURL = "http://api.sportradar.us/nfl/official/trial/v6/en/";
-
-const test = "http://api.sportradar.us/nfl/official/trial/v6/en/games/"+
-  "0e00303b-ee60-4cf4-ad68-48efbe53901d/boxscore.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt";
-
+const preURL = "http://api.sportradar.us/nba/trial/v7/en/";
 
 /// Export Section
-export const getWeeklySchedule = (week:number | string) => request(buildWeeklySchedule(week));
 export const getSchedule = (year?:string,season?:string) => request(buildSchedule(year,season));
-export const getGameStats = (gameId:string) => request(buildGameStats(gameId));
-
+export const getGameBoxScore = (gameId:string) => request(buildBoxScore(gameId));
 
 
 function buildURL(endpoint:string,...opts:string[]): string {
   return preURL + opts.join('/') + '/' + endpoint + '.' + ret_format;
-}
-
-/**
- * buildWeeklySchedule - 
- * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/2020/REG/1/schedule.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt
- * @param week 
- * @returns string
- */
-function buildWeeklySchedule(week:number | string) : string {
-  return preURL + 'games/' + statics.year + '/' + statics.nfl_season + '/' + statics.nfl_season_week + '/schedule.json';
 }
 
 /**
@@ -51,7 +29,7 @@ function buildBoxScore(game_id:string) : string {
 
 /**
  * buildSchedule
- * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/2020/REG/schedule.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt
+ * ex: http://api.sportradar.us/nba/trial/v7/en/games/2021/REG/schedule.json?api_key=
  * 
  * @param year schedule year (defaults: 2020)
  * @param season season (PRE,REG,PST, defaults: REG)
@@ -62,16 +40,16 @@ function buildSchedule(year:string='2020',season:string='REG') : string {
 } 
 
 /**
- * buildGameStats
- * ex: http://api.sportradar.us/nfl/official/trial/v6/en/games/018556f9-1977-4a0b-8244-20cad15df9a4/statistics.json?api_key=vx6m3fvnsdmwa87fmuu6aqgt
+ * buildGameBoxScore
+ * ex: http://api.sportradar.us/nba/trial/v7/en/games/22ca891e-3589-40d1-b9ca-31196c83b883/boxscore.xml?api_key=uhjmv47p7vv628dgkr9vvphm
  * 
  * @param game_id
  * @returns string
  */
 function buildGameStats(game_id:string): string {
-  if (!game_id) throw new Error(`Can't retreive games stats for empty game_id`);
+  if (!game_id) throw new Error(`Can't retreive games boxscore for empty game_id`);
 
-  return buildURL('statistics','games',game_id);
+  return buildURL('summary','games',game_id);
 }
 
 async function request(url:string) : Promise<any> {
