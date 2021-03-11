@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { Logger, logError, convertError } from '../logging';
+import { Logger, logError } from '../logging';
 import { getTeam } from '../utils/teams';
 import { convertToCsv, createDatedFileName, outputToFile, readFromFile } from '../utils/output';
 import { sleep } from '../utils/utils';
@@ -103,7 +103,7 @@ const transform = (entry:any) => {
 
   }
   catch (err) {
-    Logger.error(err.toString());
+    logError(err.toString());
   }
 
   return entry;
@@ -137,7 +137,7 @@ export async function doSeason(refresh?:boolean) : Promise<any> {
     }
   }
   catch(err) {
-    Logger.error(err.toString());
+    logError(err.toString());
   }
 }
 
@@ -157,17 +157,16 @@ function _convertToCSV(boxScores:any[]) : string {
 async function _getSchedule(refresh:boolean=false) : Promise<any> {
   let seasonData:any;
   try {
-    // let file = await readFromFile('./NBA_SeasonData2020.json');
-    // seasonData = ( refresh || !file) ? undefined : JSON.parse(file);
-    seasonData = ( refresh) ? undefined : JSON.parse( await readFromFile('./NBA_SeasonData2020.json') );
+    let file = await readFromFile('./NBA_SeasonData2020.json');
+    seasonData = ( refresh || !file) ? undefined : JSON.parse(file);
+    // seasonData = ( refresh) ? undefined : JSON.parse( await readFromFile('./NBA_SeasonData2020.json') );
   }
   catch (err) {
+    // Logger.error(err);
     // Logger.error(convertError(err));
     logError(err);
     seasonData = undefined;
   }  
-
-  return [];
 
   if (!seasonData) {
     let resp = await getSchedule();
@@ -187,7 +186,7 @@ async function _getGameStats(gameId:string) : Promise<any> {
   try {
     gameData = await readFromFile('./output/game_stats/' + gameId);
   } catch (err) {
-    Logger.error(err.toString());
+    logError(err.toString());
     gameData = undefined;
   }
   if (!gameData) {
@@ -211,7 +210,7 @@ async function _getOrCreateFile(filePath:string,retrieve:RetrieveFunction) : Pro
     }
   }
   catch (err) {
-    Logger.error(err.toString());
+    logError(err.toString());
     retVal = undefined;
   }
   if (!retVal) {

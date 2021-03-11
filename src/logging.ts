@@ -16,44 +16,19 @@ const myFormat = format.printf(({ level, message, timestamp }) => {
     : `{"timestamp":"${timestamp}"},{"level":"${level}"},{"message":"${message}"}`;
 });
 
+const customFormat = format((info, opts) => {
+  if (info.stack) {
+    info.message = info.stack;
+  }
 
-// const { errors } = logFormat;
-// const errorsFormat = errors({ stack: true });
+  return info;
+});
 
 class Log {
   private static instance: winsLogger;
 
   static getInstance(): winsLogger {
     if (!Log.instance) {
-      // Log.instance = createLogger({
-      //   exitOnError: false,
-      //   format: format.combine(format.errors({ stack: true }), format.colorize(), format.timestamp(), format.splat(), myFormat), // toScreen
-      //   transports: [ new transports.Console({handleExceptions: true})]
-
-      //   // format: format.combine(format.timestamp(), format.splat(), format.errors({stack:true}), myFormat),
-      //   // transports: _.map(Config.logging, logEntry => {
-      //   //   // return new DailyRotateFile(_.pick(logEntry,['filename','level']));
-      //   //   return new DailyRotateFile(logEntry);
-      //   // }),
-      //   // transports: [
-      //   //     //
-      //   //     // - Write to all logs with level `info` and below to `combined.log`
-      //   //     // - Write all logs error (and below) to `error.log`.
-      //   //     //
-      //   //     // new transports.Console(),
-      //   //     new transports.File({ filename: 'logs/error.log', level: 'error' }),
-      //   //     new transports.File({ filename: 'logs/audit-report.log', level: 'info' }),
-      //   //     new transports.File({ filename: 'logs/audit-debug.log', level: 'debug' })
-      //   //   ]
-      // });
-      // // TODO: keep when needing to write to log and console
-      // Log.instance.add(
-      //   new transports.Console({
-      //     level: 'debug',
-      //     format: format.combine(format.colorize(), format.timestamp(), format.splat(), format.errors({stack:true})), // toScreen
-      //   }),
-      // );
-
       Log.instance = createLogger({
         level:'debug',
         exitOnError: false,
@@ -61,7 +36,7 @@ class Log {
         transports: [
           new transports.Console({
             // level:'debug',
-            format: format.combine((format.json(), format.splat(), format.errors({ stack: true }), format.colorize(), toScreen))
+            format: format.combine((format.json(), format.splat(), format.errors({ stack: true }), format.colorize(), format.timestamp(),toScreen))
           }),
           // new transports.File({ filename: 'logs/error.log', level: 'error' }),
           // new transports.File({ filename: 'logs/audit-report.log', level: 'info' }),
@@ -72,6 +47,14 @@ class Log {
             //   // })
         ]
       });
+
+      // // TODO: keep when needing to write to log and console
+      // Log.instance.add(
+      //   new transports.Console({
+      //     level: 'debug',
+      //     format: format.combine(format.colorize(), format.timestamp(), format.splat(), format.errors({stack:true})), // toScreen
+      //   }),
+      // );
     }
 
     return Log.instance;
