@@ -19,6 +19,6 @@
   "files": [
     "typings/typings.d.ts"
   ],
-  "include": ["src/*.ts", "src/utils/*.ts"],
+  "include": ["src/*.ts", "src/utils/*.ts", "src/nfl/sportRadar.ts", "src/nfl/sportsOdds.ts", "src/nfl/mlEngine.ts", "src/nfl/oddsEngine.ts", "src/nfl/statsEngine.ts"],
   "exclude": ["node_modules","**/__tests__/*","src/*.bak.ts"]
 }

@@ -3,12 +3,11 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import { Logger } from './logging';
-import { doOdds } from './oddsEngine';
-import { doSeason } from './statsEngine';
-import { dfdTest, train } from './mlEngine';
-import { iSportType } from './utils/interfaces';
+import { doOdds } from './utils/oddsEngine';
+import { doSeason as NFLSeason } from './nfl/statsEngine';
+// import { dfdTest, train } from './nfl/mlEngine';
 
-import { doOdds as NBAOdds } from './nba/oddsEngine';
+import { doSeason as NBASeason } from './nba/statsEngine';
 
 const argv = yargs(hideBin(process.argv)).argv;
 const dateFormat = 'MM/D h:mm A';
@@ -36,31 +35,24 @@ async function run() {
     Logger.info(`Running NBA odds... Refresh:${refresh}`);
     doOdds({sport:'basketball_nba',display:'nba'},refresh);
   }
-  else if (_.isEqual(mode,'season')) {
+  else if (_.isEqual(mode,'nfl_season')) {
     let refresh = (/true/i).test(String(_.get(argv,'refresh')));
     Logger.info(`Running season... Refresh:${refresh}`);
-    doSeason(refresh);
+    NFLSeason(refresh);
   }
   else if (_.isEqual(mode,'nba_season')) {
     let refresh = (/true/i).test(String(_.get(argv,'refresh')));
     Logger.info(`Running season... Refresh:${refresh}`);
-    doSeason(refresh);
+    NBASeason(refresh);
   }
   else if (_.isEqual(mode,'dfd')) {
     Logger.info(`Tensor Flow...`);
-    dfdTest();
+    // dfdTest();
     // train();
   }
   else {
     Logger.warn(`No mode is set. Exiting`);
   }
-
-  // console.log('----------------- hello world --------------');
-  // await get_model();
-  // console.log('----------------- model created --------------');
-
-  // dfdTest();
-  // train();
 }
 
 run();

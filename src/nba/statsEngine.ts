@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { Logger } from '../logging';
+import { Logger, logError, convertError } from '../logging';
 import { getTeam } from '../utils/teams';
 import { convertToCsv, createDatedFileName, outputToFile, readFromFile } from '../utils/output';
 import { sleep } from '../utils/utils';
@@ -8,7 +8,7 @@ import { sleep } from '../utils/utils';
 import { getSchedule, getGameBoxScore } from './sportRadar';
 import { csv } from 'd3';
 
-const AWAIT_REQUEST_MS = 1000;
+const AWAIT_REQUEST_MS = 1500;
 
 interface Team {
   id: string;
@@ -157,19 +157,25 @@ function _convertToCSV(boxScores:any[]) : string {
 async function _getSchedule(refresh:boolean=false) : Promise<any> {
   let seasonData:any;
   try {
-    seasonData = refresh ? undefined : JSON.parse( await readFromFile('./seasonData.json'));
+    // let file = await readFromFile('./NBA_SeasonData2020.json');
+    // seasonData = ( refresh || !file) ? undefined : JSON.parse(file);
+    seasonData = ( refresh) ? undefined : JSON.parse( await readFromFile('./NBA_SeasonData2020.json') );
   }
   catch (err) {
-    Logger.error(err.toString());
+    // Logger.error(convertError(err));
+    logError(err);
     seasonData = undefined;
   }  
+
+  return [];
+
   if (!seasonData) {
     let resp = await getSchedule();
 
-    seasonData = _.get(resp,'data',[]);
+    seasonData = _.get(resp,'data.games',[]);
 
     // write the json to file
-    await outputToFile('./seasonData2020.json',JSON.stringify(seasonData));
+    await outputToFile('./NBA_SeasonData2020.json',JSON.stringify(seasonData));
   }
 
   return seasonData;

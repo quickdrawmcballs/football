@@ -38,13 +38,15 @@ or better yet
 
 ## CLI
 Run odds retreiver
-* `npm run main -- odds --refresh=true`
+* `npm run main -- nfl_odds --refresh=true`
+* `npm run main -- nba_odds --refresh=true`
 
 Run season schedule results retreiver
-* `npm run main -- season --refresh=true`
+* `npm run main -- nfl_season --refresh=true`
+* `npm run main -- nba_season --refresh=true`
 
-Run ML predictor
-* `npm run main -- odds`
+Run ML predictor (only setup for NFL currently)
+* `npm run main -- dfd`
 
 ## Output
 Output for Odds and Season Results are placed under output. Individual games stats will be placed under output/game_stats. To save account requests, only games that can't be found in this directory will be retrieved

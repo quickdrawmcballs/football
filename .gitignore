@@ -3,5 +3,6 @@
 **/dist/
 **/lib/
 **/node_modules
+**/game_stats
 **/config/debug.json
 **/config/sportsOdds.json
