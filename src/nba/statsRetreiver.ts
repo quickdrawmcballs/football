@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import { Logger } from '../logging';
-import { getTeam } from '../utils/teams';
+import { getTeamName } from '../utils/teams';
 import { convertToCsv, createDatedFileName, outputToFile, readFromFile } from '../utils/output';
 import { sleep } from '../utils/utils';
 
@@ -98,8 +98,8 @@ const fields = [
 
 const transform = (entry:any) => {
   try {
-    entry.home_team = getTeam(entry.home.name);
-    entry.away_team = getTeam(entry.away.name);
+    entry.home_team = getTeamName(entry.home.name);
+    entry.away_team = getTeamName(entry.away.name);
 
   }
   catch (err) {
@@ -128,6 +128,8 @@ export async function doSeason(refresh?:boolean) : Promise<any> {
       });
       boxScores.push(_.merge(game,{game_stats}));
     }
+
+    Logger.info(`Finishined retreiving all ${games.length} games`);
 
     let csv:string = _convertToCSV([]);
 

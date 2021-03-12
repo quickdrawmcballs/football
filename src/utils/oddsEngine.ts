@@ -5,7 +5,7 @@ import { parse } from 'json2csv';
 import { Logger } from '../logging';
 import { getOddsSpread } from './sportsOdds';
 import { convertToCsv, createDatedFileName, outputToFile, readFromFile } from './output';
-import { getTeam } from './teams';
+import { getTeamName } from './teams';
 import { iSportType } from './interfaces';
 
 const dateFormat = 'MM/D hh:mm A';
@@ -82,8 +82,8 @@ function _parseGames(games:any[]) : Game[] {
 
     let game:Game = {
       date: moment(data.commence_time).format(dateFormat),
-      home_team: getTeam(data.home_team),
-      away_team: getTeam(firstIsHome? data.teams[1] : data.teams[0]),
+      home_team: getTeamName(data.home_team),
+      away_team: getTeamName(firstIsHome? data.teams[1] : data.teams[0]),
     };
 
     if (odds) {

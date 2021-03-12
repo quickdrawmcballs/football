@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import { Logger } from '../logging';
-import { getTeam } from '../utils/teams';
+import { getTeamName } from '../utils/teams';
 import { convertToCsv, createDatedFileName, outputToFile, readFromFile } from '../utils/output';
 import { getSchedule, getGameStats } from './sportRadar';
 import { sleep } from '../utils/utils';
@@ -98,8 +98,8 @@ const fields = [
 
 const transform = (entry:any) => {
   try {
-    entry.home_team = getTeam(entry.home.name);
-    entry.away_team = getTeam(entry.away.name);
+    entry.home_team = getTeamName(entry.home.name);
+    entry.away_team = getTeamName(entry.away.name);
     entry.home_total_yards = entry.game_stats.statistics.home.summary.total_yards;
     entry.away_total_yards = entry.game_stats.statistics.away.summary.total_yards;
     entry.home_penalty_yards = entry.game_stats.statistics.home.summary.penalty_yards;

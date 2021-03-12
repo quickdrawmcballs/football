@@ -6,6 +6,7 @@ import { Logger } from './logging';
 import { doOdds } from './utils/oddsEngine';
 import { doSeason as NFLSeason } from './nfl/statsRetreiver';
 // import { dfdTest, train } from './nfl/mlEngine';
+import { calc } from './nba/statsEngine';
 
 import { doSeason as NBASeason } from './nba/statsRetreiver';
 
@@ -49,6 +50,10 @@ async function run() {
     Logger.info(`Tensor Flow...`);
     // dfdTest();
     // train();
+  }
+  else if (_.isEqual(mode,'nba_play')) {
+    Logger.info(`NBA Stats...`);
+    calc();
   }
   else {
     Logger.warn(`No mode is set. Exiting`);
