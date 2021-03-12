@@ -4,10 +4,10 @@ import { hideBin } from 'yargs/helpers';
 
 import { Logger } from './logging';
 import { doOdds } from './utils/oddsEngine';
-import { doSeason as NFLSeason } from './nfl/statsEngine';
+import { doSeason as NFLSeason } from './nfl/statsRetreiver';
 // import { dfdTest, train } from './nfl/mlEngine';
 
-import { doSeason as NBASeason } from './nba/statsEngine';
+import { doSeason as NBASeason } from './nba/statsRetreiver';
 
 const argv = yargs(hideBin(process.argv)).argv;
 const dateFormat = 'MM/D h:mm A';

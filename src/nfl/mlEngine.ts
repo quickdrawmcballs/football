@@ -5,7 +5,7 @@ import { mean } from 'd3';
 
 import { teams } from '../utils/teams';
 import { formatFloat } from '../utils/utils';
-import { doSeason } from './statsEngine';
+import { doSeason } from './statsRetreiver';
 import { data } from '@tensorflow/tfjs-node';
 
 const transformCols = ['avg_x_off_points', 'total_x_off_points', 'avg_x_def_points', 'total_x_def_points', 
