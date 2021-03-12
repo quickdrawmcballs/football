@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import _ from 'lodash';
 
 import { Config } from '../config';
-import { Logger, logError } from '../logging';
+import { Logger } from '../logging';
 
 const preURL = "https://api.the-odds-api.com/v3/odds/";
 // const apiKey:string = Config.theOddsApi.apiKey;
@@ -38,6 +38,6 @@ async function request(url:string,params:any) : Promise<any> {
 
     return resp;
   } catch (err) {
-    logError(`${url} has failed. ${err.toString()}`);
+    Logger.error(`${url} has failed. ${err.toString()}`);
   }
 }

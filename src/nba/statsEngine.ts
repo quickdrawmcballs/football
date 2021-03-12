@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { Logger, logError } from '../logging';
+import { Logger } from '../logging';
 import { getTeam } from '../utils/teams';
 import { convertToCsv, createDatedFileName, outputToFile, readFromFile } from '../utils/output';
 import { sleep } from '../utils/utils';
@@ -103,7 +103,7 @@ const transform = (entry:any) => {
 
   }
   catch (err) {
-    logError(err.toString());
+    Logger.error(err);
   }
 
   return entry;
@@ -137,7 +137,7 @@ export async function doSeason(refresh?:boolean) : Promise<any> {
     }
   }
   catch(err) {
-    logError(err.toString());
+    Logger.error(err);
   }
 }
 
@@ -159,12 +159,9 @@ async function _getSchedule(refresh:boolean=false) : Promise<any> {
   try {
     let file = await readFromFile('./NBA_SeasonData2020.json');
     seasonData = ( refresh || !file) ? undefined : JSON.parse(file);
-    // seasonData = ( refresh) ? undefined : JSON.parse( await readFromFile('./NBA_SeasonData2020.json') );
   }
   catch (err) {
-    // Logger.error(err);
-    // Logger.error(convertError(err));
-    logError(err);
+    Logger.error(err);
     seasonData = undefined;
   }  
 
@@ -186,7 +183,7 @@ async function _getGameStats(gameId:string) : Promise<any> {
   try {
     gameData = await readFromFile('./output/game_stats/' + gameId);
   } catch (err) {
-    logError(err.toString());
+    Logger.error(err);
     gameData = undefined;
   }
   if (!gameData) {
@@ -210,7 +207,7 @@ async function _getOrCreateFile(filePath:string,retrieve:RetrieveFunction) : Pro
     }
   }
   catch (err) {
-    logError(err.toString());
+    Logger.error(err);
     retVal = undefined;
   }
   if (!retVal) {

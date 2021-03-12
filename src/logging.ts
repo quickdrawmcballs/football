@@ -4,24 +4,16 @@ import { Format } from 'logform';
 
 // import { LEVEL } from 'triple-beam';
 
-const toScreen = format.printf(({ level, message, timestamp }) => {
+const toScreen = format.printf(({ level, message, timestamp, stack }) => {
   return _.isObject(message)
     ? `[${timestamp}] ${level}: ${JSON.stringify(message)}`
-    : `[${timestamp}] ${level}: ${message}`;
+    : `[${timestamp}] ${level}: ${stack || message}`;
 });
 
 const myFormat = format.printf(({ level, message, timestamp }) => {
   return _.isObject(message)
     ? `{"timestamp":"${timestamp}"},{"level":"${level}"},${JSON.stringify(message)}`
     : `{"timestamp":"${timestamp}"},{"level":"${level}"},{"message":"${message}"}`;
-});
-
-const customFormat = format((info, opts) => {
-  if (info.stack) {
-    info.message = info.stack;
-  }
-
-  return info;
 });
 
 class Log {
@@ -32,11 +24,11 @@ class Log {
       Log.instance = createLogger({
         level:'debug',
         exitOnError: false,
-        format: format.combine(format.errors({ stack: true }), format.timestamp(), format.colorize(), format.splat(), format.json()),
+        format: format.combine(format.errors({ stack: true }), format.timestamp(), format.colorize(), format.splat(), format.json(), toScreen),
         transports: [
           new transports.Console({
             // level:'debug',
-            format: format.combine((format.json(), format.splat(), format.errors({ stack: true }), format.colorize(), format.timestamp(),toScreen))
+            // format: format.combine((format.json(), format.splat(), format.errors({ stack: true }), format.colorize(), format.timestamp(), toScreen))
           }),
           // new transports.File({ filename: 'logs/error.log', level: 'error' }),
           // new transports.File({ filename: 'logs/audit-report.log', level: 'info' }),
@@ -68,9 +60,6 @@ export function convertError(error:any): string {
   }
 
   return _.get(error,'stack') || error.toString();
-}
-export function logError(error:any) {
-  Logger.error(convertError(error));
 }
 
 let retVal = Log.getInstance();

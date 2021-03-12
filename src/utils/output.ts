@@ -4,7 +4,7 @@ import path from 'path';
 import moment from 'moment';
 import { parse } from 'json2csv';
 
-import { Logger, logError } from '../logging';
+import { Logger } from '../logging';
 
 const _outputDir = './output';
 
@@ -21,8 +21,8 @@ export async function outputToFile(filePath:string,data:any) : Promise<any> {
     let output = await fsPromises.writeFile(filePath, data);
     Logger.info(`Successfully created ${filePath}`);
     return output;
-  } catch (er) {
-    logError(er);
+  } catch (err) {
+    Logger.error(err);
   }
 }
 
@@ -30,7 +30,7 @@ export async function readFromFile(filePath:string,options?:any) : Promise<any> 
   try {
     return await fsPromises.readFile(filePath, options);
   } catch (err) {
-    (_.get(err,'code') === 'ENOENT') ? Logger.debug(err.toString()) : logError(err.toString());
+    (_.get(err,'code') === 'ENOENT') ? Logger.debug(err.toString()) : Logger.error(err);;
   }
 }
 
@@ -48,7 +48,7 @@ export function convertToCsv(data:any, opts?:any) : string {
     csv = parse(data, opts);
   } catch (err) {
     csv = '';
-    logError(err);
+    Logger.error(err);
   }
 
   return csv;
