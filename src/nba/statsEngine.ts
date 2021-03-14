@@ -12,6 +12,8 @@ interface TEAM_BOXSCORES extends TEAM {
         home: any[];
     }
 }
+
+// h_q1, h_q2, h_half, h_q3, h_q4, h_2half, h_total, a_q1, a_q2, a_half, a_q3, a_q4, a_2half, a_total, ftr
 interface SCORE_ANALYSIS {
     h_team: TEAM;
     h_q1: number;
@@ -35,10 +37,6 @@ interface SCORE_ANALYSIS {
 
     ftr: string;
 }
-
-
-
-// h_q1, h_q2, h_half, h_q3, h_q4, h_2half, h_total, a_q1, a_q2, a_half, a_q3, a_q4, a_2half, a_total, ftr
 
 export async function calc(refresh?:boolean) {
     let team_boxscores:any = {};
@@ -122,4 +120,15 @@ export async function calc(refresh?:boolean) {
     console.log(`Win rate of away 4th Quarter ${ formatFloat(a_q4_win.length / aways.length * 100) }`);
     console.log(`Win rate of away 1st Half ${ formatFloat(a_half_win.length / aways.length * 100) }`);
   
+    let q1_win = _.filter(analysis,(game:SCORE_ANALYSIS)=> game.ftr === 'A' ? (game.h_q1 < game.a_q1) : (game.h_q1 > game.a_q1));
+    let q2_win = _.filter(analysis,(game:SCORE_ANALYSIS)=> game.ftr === 'A' ? (game.h_q2 < game.a_q2) : (game.h_q2 > game.a_q2));
+    let q3_win = _.filter(analysis,(game:SCORE_ANALYSIS)=> game.ftr === 'A' ? (game.h_q3 < game.a_q3) : (game.h_q3 > game.a_q3));
+    let q4_win = _.filter(analysis,(game:SCORE_ANALYSIS)=> game.ftr === 'A' ? (game.h_q4 < game.a_q4) : (game.h_q4 > game.a_q4));
+    let half_win = _.filter(analysis,(game:SCORE_ANALYSIS)=> game.ftr === 'A' ? (game.h_half < game.a_half) : (game.h_half > game.a_half));
+    
+    console.log(`Win rate of 1st Quarter ${ formatFloat(q1_win.length / analysis.length * 100) }`);
+    console.log(`Win rate of 2nd Quarter ${ formatFloat(q2_win.length / analysis.length * 100) }`);
+    console.log(`Win rate of 3rd Quarter ${ formatFloat(q3_win.length / analysis.length * 100) }`);
+    console.log(`Win rate of 4th Quarter ${ formatFloat(q4_win.length / analysis.length * 100) }`);
+    console.log(`Win rate of 1st Half ${ formatFloat(half_win.length / analysis.length * 100) }`);
 }

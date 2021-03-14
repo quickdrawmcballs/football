@@ -55,3 +55,8 @@ Output for predictions are currently written to console.
 
 ## Usage
 Odds are not used in predictor, only season results. Season results must be ran before predictor.
+
+## Troubleshooting
+#### Tensforflow
+* Ensure you have windows-build-tools installed `npm install --g --production windows-build-tools`.
+  * Should install Ptyhon 2.X (as of the time of writing this is the only way to build Tensorflow.js)

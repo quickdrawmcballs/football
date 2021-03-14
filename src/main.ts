@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers';
 import { Logger } from './logging';
 import { doOdds } from './utils/oddsEngine';
 import { doSeason as NFLSeason } from './nfl/statsRetreiver';
-// import { dfdTest, train } from './nfl/mlEngine';
+import { dfdTest, train } from './nfl/mlEngine';
 import { calc } from './nba/statsEngine';
 
 import { doSeason as NBASeason } from './nba/statsRetreiver';
@@ -48,7 +48,7 @@ async function run() {
   }
   else if (_.isEqual(mode,'dfd')) {
     Logger.info(`Tensor Flow...`);
-    // dfdTest();
+    dfdTest();
     // train();
   }
   else if (_.isEqual(mode,'nba_play')) {

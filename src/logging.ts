@@ -2,8 +2,6 @@ import _ from 'lodash';
 import { Logger as winsLogger, createLogger, transports, format} from 'winston';
 import { Format } from 'logform';
 
-// import { LEVEL } from 'triple-beam';
-
 const toScreen = format.printf(({ level, message, timestamp, stack }) => {
   return _.isObject(message)
     ? `[${timestamp}] ${level}: ${JSON.stringify(message)}`
