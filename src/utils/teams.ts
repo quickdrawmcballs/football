@@ -3,6 +3,8 @@ import _ from 'lodash';
 import { Config } from '../config';
 
 export const teams = Config.teams||{};
+export const NBA_TEAMS = _.filter(teams,['league','NBA']);
+export const NFL_TEAMS = _.filter(teams,['league','NFL']);
 
 export interface TEAM {
   city: string;

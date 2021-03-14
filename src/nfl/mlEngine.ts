@@ -2,8 +2,9 @@ import _ from 'lodash';
 import * as dfd from 'danfojs-node';
 import * as tf from '@tensorflow/tfjs-node';
 import { mean } from 'd3';
+import path from 'path';
 
-import { teams } from '../utils/teams';
+import { NFL_TEAMS } from '../utils/teams';
 import { formatFloat } from '../utils/utils';
 import { doSeason } from './statsRetreiver';
 import { data } from '@tensorflow/tfjs-node';
@@ -19,7 +20,7 @@ const finalCols = ['home_team_norm','away_team_norm','home_avg_x_off_points', 'h
 'away_avg_x_off_points', 'away_total_x_off_points', 'away_avg_x_def_points', 'away_total_x_def_points', 'away_avg_x_off_total_rushing_yards', 
 'away_total_x_off_total_rushing_yards', 'away_avg_x_def_total_rushing_yards', 'away_total_x_def_total_rushing_yards', 'away_avg_x_off_total_passing_yards', 
 'away_total_x_off_total_passing_yards', 'away_avg_x_def_total_passing_yards', 'away_total_x_def_total_passing_yards', 'away_avg_x_off_diff', 'away_total_x_off_diff', 
-'away_avg_x_def_diff', 'away_total_x_def_diff', 'ftr_norm']; // 'away_wld_norm',
+  'away_avg_x_def_diff', 'away_total_x_def_diff', 'ftr_norm']; // 'away_wld_norm',
 
 async function load_process_data() {
   let df = await dfd.read_csv("delete/titanic.csv")
@@ -99,7 +100,7 @@ export async function train() {
 
 export async function dfdTest() {
   // let df = await dfd.read_csv('https://web.stanford.edu/class/archive/cs/cs109/cs109.1166/stuff/titanic.csv');
-  let df = await dfd.read_csv('./output/20201215-190756_season.csv');
+  let df = await dfd.read_csv('file://C:\\workspace\\football\\output\\20210119-165625_season.csv'); // 'output\\20200119-1656256_season.csv'
   
   // add total_points column
   df.addColumn({column:'total_points',value:df.home_points.add(df.away_points)});
@@ -124,7 +125,7 @@ export async function dfdTest() {
   // process all labeled columns
   let encoder = new dfd.LabelEncoder();
   let name_cols = ['home_team','away_team'];
-  encoder.fit(_.map(teams,'team'));
+  encoder.fit(_.map(NFL_TEAMS,'team'));
   let encoded_names = encoder.label;
   name_cols.forEach(col => dfTransformed.addColumn({ column: col+'_norm', value: encoder.transform(dfTransformed[col]) }));
 
@@ -173,7 +174,7 @@ export async function dfdTest() {
 
   // let data = {"home_team":['Bears'],"away_team":['Lions']};
   // let dt_test = new dfd.DataFrame(data);
-  // encoder.fit(_.map(teams,'team'));
+  // encoder.fit(_.map(NFL_TEAMS,'team'));
   // _.keys(data).forEach(col=>dt_test.addColumn({ column: col+'_norm', value: encoder.transform(dt_test[col])}));
   // dt_test.head().print();
   // let X_predict = dt_test.loc({columns:['home_team_norm','away_team_norm']});
@@ -234,7 +235,7 @@ export async function dfdTestBack() {
   // process all labeled columns
   let encoder = new dfd.LabelEncoder();
   let name_cols = ['home_team','away_team'];
-  encoder.fit(_.map(teams,'team'));
+  encoder.fit(_.map(NFL_TEAMS,'team'));
   let encoded_names = encoder.label;
   name_cols.forEach(col => df.addColumn({ column: col+'_norm', value: encoder.transform(df[col]) }));
 
@@ -382,7 +383,7 @@ function xAvgTransform(dataframe:any,xGames:number) : any {
   let teamsData = new Map();
 
   // get team calcs
-  _.values(teams).forEach( (team:any) => {
+  _.values(NFL_TEAMS).forEach( (team:any) => {
     // create xAvg values
     let teamGames = getTeamGames(dataframe,team.team);
     let teamData = teamGames.teamData;
@@ -544,7 +545,7 @@ function getTeamIndex(dataFrame:any,team:string) : any {
 }
 
 function createTeamIndex(dataFrame:any) : any {
-  return _.map(teams,team=>{
+  return _.map(NFL_TEAMS,team=>{
     let lookup = dataFrame.query({ 'column': 'home_team', 'is': '==', 'to': team.team }).unique();
     if (lookup) {
       let retVal:any = {};
