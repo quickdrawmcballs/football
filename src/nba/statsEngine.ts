@@ -201,7 +201,7 @@ export async function calc(refresh?:boolean) {
         function printGames(team:string) : void {
             _.sortBy(buildIt[team].allGames,['game.scheduled']).forEach( (game:any) => {
                 console.log(`${game.scheduled}:\t${game.away.name} H: ${game.a_half} T: ${game.away_points}\t@\t${game.home.name}: H: ${game.h_half} T: ${game.home_points}.\t\tHalfWinner: ${game.half_winner}, Winner: ${game.winner}`);
-            }
+            });
         }
 
         console.log('-----------------');
