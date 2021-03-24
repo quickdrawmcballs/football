@@ -273,6 +273,12 @@
       "full": "Indiana Pacers",
       "league": "NBA"
     },
+    "Memphis Grizzlies": {
+      "city": "Memphis",
+      "team": "Grizzlies",
+      "full": "Memphis Grizzlies",
+      "league": "NBA"
+    },
     "Miami Heat": {
       "city": "Miami",
       "team": "Heat",
@@ -317,9 +323,10 @@
     },
     "Los Angeles Clippers": {
       "city": "Los Angeles",
-      "team": "Lakers",
-      "full": "Philadelphia Clippers",
-      "league": "NBA"
+      "team": "Clippers",
+      "full": "Los Angeles Clippers",
+      "league": "NBA",
+      "alt1": "LA Clippers"
     },
     "Los Angeles Lakers": {
       "city": "Los Angeles",

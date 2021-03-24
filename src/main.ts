@@ -52,8 +52,9 @@ async function run() {
     // train();
   }
   else if (_.isEqual(mode,'nba_play')) {
+    let refresh = (/true/i).test(String(_.get(argv,'refresh')));
     Logger.info(`NBA Stats...`);
-    calc();
+    calc(refresh);
   }
   else {
     Logger.warn(`No mode is set. Exiting`);

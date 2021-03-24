@@ -34,6 +34,8 @@ interface Game {
   // scoring: Scoring;
   boxScore: BoxScore;
   venue: Venue;
+  status: string;
+  title: string;
 }
 
 interface Scoring {
@@ -113,8 +115,15 @@ export async function doSeason(refresh?:boolean) : Promise<any> {
   try {
     let games:Game[] = await _getSchedule(refresh);
 
-    // get played games
-    games = _.filter(games,['status','closed']);
+    // get played games, exclude all star games
+    // games = _.filter(games,['status','closed']);
+    // games = _.filter(games,['title', '2021 NBA All-Star Game']);
+    games = _.filter(games,(game:Game)=>{
+      if (game.id === 'ccc110a0-be7a-4030-b2f5-64804fe33393') {
+        let i = 1;
+      }
+      return (game.status === 'closed') && !(/All-Star Game/i).test(game.title);
+    });
 
     await sleep(AWAIT_REQUEST_MS);
     Logger.info(`Retreiving ${games.length} stats. Each request will wait ${AWAIT_REQUEST_MS/1000}s, this could take a while.`)

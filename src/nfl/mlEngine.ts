@@ -108,13 +108,14 @@ export async function dfdTest() {
   df.addColumn({column:'away_diff',value:df.away_points.sub(df.home_points)});
   df.addColumn({column:'ftr',value:df.home_diff.map((val:number)=>{
     if (val>0) {
-      return 'H';
+      return 1; //'H';
     }
     else if (val<0) {
-      return 'A';
+      return 0; // 'A';
     }
     else {
-      return 'D';
+      // return 'D';
+      return 1; //'H';
     }
   })});
 
@@ -137,26 +138,30 @@ export async function dfdTest() {
   // let encoded_away_wld = encoder.label;
   // dfTransformed.addColumn({ column: 'home_wld_norm', value: encoder.transform(dfTransformed.away_wld) });
 
-  encoder.fit(dfTransformed.ftr);
-  let encoded_ftr = encoder.label;
-  dfTransformed.addColumn({ column: 'ftr_norm', value: encoder.transform(dfTransformed.ftr) });
+  // encoder.fit(dfTransformed.ftr);
+  // let encoded_ftr = encoder.label;
+  // dfTransformed.addColumn({ column: 'ftr_norm', value: encoder.transform(dfTransformed.ftr) });
 
-  const toTest = 1;
+  const toTest = 16;
 
   // test with the last once
   // let X_all = dfTransformed.loc({columns:finalCols});
-  let X_all = dfTransformed.loc({columns:finalCols,rows:[`0:${dfTransformed.shape[0]-toTest}`]});
+  let X_all = dfTransformed.loc({columns:finalCols,rows:[`18:${dfTransformed.shape[0]-toTest}`]});
+  X_all = X_all.drop({columns:['ftr'],axis:1});
   let dt_test = dfTransformed.loc({columns:finalCols,rows:[`${dfTransformed.shape[0]-toTest}:${dfTransformed.shape[0]}`]});
   // X_all = X_all.iloc({rows:[`0:${dfTransformed.shape[0]-1}`]});
   // X_all.head().print();
   
-  let y_all = dfTransformed.loc({columns:['ftr_norm'],rows:[`0:${dfTransformed.shape[0]-toTest}`]});
+  let y_all = dfTransformed.loc({columns:['ftr'],rows:[`0:${dfTransformed.shape[0]-toTest}`]});
 
   console.log('Scaling Min/Max...');
   // Standardize the data with MinMaxScaler
   let scaler = new dfd.MinMaxScaler();
   scaler.fit(X_all); //   // df.iloc({ columns: [`1:`] })
   let X_all_scale = scaler.transform(X_all);
+  let dt_test_scale = scaler.transform(dt_test);
+  // let testIt = (<Series>(X_all_scale.mean(1) - dt_test.mean(1))).abs();
+  let testIt = X_all_scale.mean(1).sub(dt_test_scale.mean(1)).abs();
 
   // X_all_scale.head().print();
 
@@ -169,10 +174,16 @@ export async function dfdTest() {
   //  for col in cols:
   //     X_all[col] = scale(X_all[col])
 
+  // TODO: make sure ftr column is stripped out of X_all_scale
   console.log('Model Training starting...');
-  let model = await dfdTrain(X_all_scale.tensor,y_all.tensor);
+  let model = await dfdTrainSimple(X_all_scale.tensor,y_all.tensor);
 
-  // let data = {"home_team":['Bears'],"away_team":['Lions']};
+  console.log('Model Predict starting...');
+  let prediction = await dfdPredict(model,dt_test_scale.tensor);
+  console.log('Prediction says...');
+  console.log(prediction.arraySync());
+
+    // let data = {"home_team":['Bears'],"away_team":['Lions']};
   // let dt_test = new dfd.DataFrame(data);
   // encoder.fit(_.map(NFL_TEAMS,'team'));
   // _.keys(data).forEach(col=>dt_test.addColumn({ column: col+'_norm', value: encoder.transform(dt_test[col])}));
@@ -191,11 +202,6 @@ export async function dfdTest() {
   // let dt_test = new dfd.DataFrame(data);
   // dt_test.head().print();
 
-  console.log('Model Predict starting...');
-  let prediction = await dfdPredict(model,dt_test.tensor);
-  console.log('Prediction says...');
-  console.log(prediction.arraySync());
-  let i = 1;
 }
 
 export async function dfdTestBack() {
@@ -473,6 +479,40 @@ function getTransformDf(dataframe:any, teamsData:any) : any {
 
   return com_df;
 }
+
+
+// simple
+async function dfdTrainSimple(X_all:any,y_all:any) : Promise<tf.Sequential> {
+  const model:tf.Sequential = tf.sequential();
+  model.add(tf.layers.dense({ inputShape: [X_all.shape[1]], units: 1, activation: 'sigmoid', kernelInitializer: 'leCunNormal' }));
+  model.summary();
+
+  model.compile({
+    optimizer: "rmsprop", // adam as another example
+    loss: 'binaryCrossentropy', // classification for W/L/D, "regression" for a number: (meansquarederror or mse) [WHILE ITS TRAINING - get feedback]
+    metrics: ['accuracy'] // loss metric. No influence while training [AFTER ITS DONE Feedback]
+  });
+
+  console.log("Training started....");
+  try {
+    await model.fit(X_all, y_all,{
+        batchSize: 32,
+        epochs: 15,
+        validationSplit: 0.2,
+        callbacks:{
+            onEpochEnd: async(epoch:any, logs:any)=>{
+              console.log(`EPOCH (${epoch + 1}): Train Accuracy: ${(logs.acc * 100).toFixed(2)},Val Accuracy:  ${(logs.val_acc * 100).toFixed(2)}\n`);
+            }
+        }
+    });
+  } 
+  catch (err) {
+    console.error(err);
+  }
+
+  return model;
+}
+
 
 async function dfdTrain(X_all:any,y_all:any) : Promise<tf.Sequential> {
   const model:tf.Sequential = tf.sequential();

@@ -25,9 +25,12 @@ export function getTeam(lookup:string) : TEAM {
   // });
 
   // return found as TEAM;
-  let test = _.find(teams,team=>_.find(team,(val,key)=>val===lookup)) as TEAM;
+  let found = _.find(teams,team=>_.find(team,(val)=>val===lookup)) as TEAM;
 
-  return _.find(teams,team=>_.find(team,(val,key)=>val===lookup)) as TEAM;
+  if (!found)
+    throw new Error(`Can't find team with lookup '${lookup}'`);
+
+  return found;
 }
 
 /**
@@ -47,7 +50,7 @@ export function getTeamName(entry:string) : string {
       found = _.get(team,'name', entry);
     }
 
-    throw new Error(`Can't find team for ${entry}`);
+    throw new Error(`Can't find team for '${entry}'`);
   }
 
   return found.team;
