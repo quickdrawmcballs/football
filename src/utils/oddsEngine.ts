@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import moment from 'moment';
-import { parse } from 'json2csv';
 
 import { Logger } from '../logging';
 import { getOddsSpread } from './sportsOdds';
@@ -10,7 +9,7 @@ import { iSportType } from './interfaces';
 
 const dateFormat = 'MM/D hh:mm A';
 
-interface Game {
+export interface Game {
   date: string;
   home_team: string;
   away_team: string;
@@ -55,11 +54,11 @@ const fields = [
   }
 ]
 
-async function _getGameOdds(sport:iSportType,refresh:boolean=true) : Promise<any[]> {
+async function _retreiveGameOdds(sport:iSportType,refresh:boolean=true) : Promise<any[]> {
   let gameOdds:any[] = refresh ? undefined :JSON.parse( await readFromFile(`./${sport.display}_oddsData.json`));
   
   if (!gameOdds) {
-    let resp = await getOddsSpread();
+    let resp = await getOddsSpread(sport.sport);
 
     gameOdds = _.get(resp,'data.data',[]);
 
@@ -97,9 +96,15 @@ function _parseGames(games:any[]) : Game[] {
   }),['date', 'home_team']);
 }
 
-export async function doOdds(sport:iSportType,refresh:boolean=true) {
+export async function getOdds(sport:iSportType,refresh:boolean=true) : Promise<Game[]> {
+  let gameOdds:any[] = await _retreiveGameOdds(sport,refresh);
 
-  let gameOdds:any[] = await _getGameOdds(sport,refresh);
+  return _parseGames(gameOdds);
+}
+
+export async function doOdds(sport:iSportType,refresh:boolean=true) : Promise<Game[]> {
+
+  let gameOdds:any[] = await _retreiveGameOdds(sport,refresh);
 
   let games:Game[] = _parseGames(gameOdds);
 
@@ -113,4 +118,6 @@ export async function doOdds(sport:iSportType,refresh:boolean=true) {
   }
 
   Logger.info(`Created Odds File successful`);
+
+  return games;
 }

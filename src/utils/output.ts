@@ -6,8 +6,6 @@ import { parse } from 'json2csv';
 
 import { Logger } from '../logging';
 
-const _outputDir = './output';
-
 // function outputToFile(filePath:string,data:any) {
 //   return new Promise((resolve,reject)=>writeFile(filePath,data,err=>{
 //     if (err) reject(err); else resolve(true);
@@ -45,7 +43,7 @@ export function convertToCsv(data:any, opts?:any) : string {
 
   try {
     Logger.debug(`Parsing into csv`);
-    csv = parse(data, opts);
+    csv = parse(data,opts);
   } catch (err) {
     csv = '';
     Logger.error(err);
